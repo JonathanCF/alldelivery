@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String @id @default(uuid())
+  nome      String
+  password  String
+  email     String
+
+  @@map("users")
+}
+
+model Empresa {
+  id        String @id @default(uuid())
+  cnpj      String @unique
+  nome      String
+  endereco  String
+
+  funcionarios Funcionarios[]
+  campanha     Campanhas[]
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("empresas")
+}
+
+
+model Funcionarios {
+  id            String @id @default(uuid())  
+  cpf           String @unique
+  nome          String
+  matricula     String?
+  cracha        String?
+
+  empresaID     String
+  empresa Empresa @relation(fields: [empresaID], references: [id])
+
+  entregas Entregas[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("funcionarios")
+}
+
+model Campanhas {
+  id            String @id @default(uuid())  
+  nome          String
+  descricao     String
+  status        Boolean @default(false)
+  dataInicio    String
+  dataFim       String
+
+  empresaID     String
+  empresa Empresa @relation(fields: [empresaID], references: [id])
+
+  entregas Entregas[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("campanhas")
+}
+
+model Entregas {
+  id                String @id @default(uuid())
+  data_entrega      String
+  quantidade        Int
+  recebido          Boolean @default(false)
+
+  funcionarios Funcionarios @relation(fields: [funcionariosID], references: [id])
+  funcionariosID    String
+
+  campanhas Campanhas @relation(fields: [campanhaID], references: [id])
+  campanhaID        String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("entregas")
+
+}
